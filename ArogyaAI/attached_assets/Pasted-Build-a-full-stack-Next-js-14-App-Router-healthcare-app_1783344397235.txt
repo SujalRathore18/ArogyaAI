@@ -1,0 +1,61 @@
+Build a full-stack Next.js 14 (App Router) healthcare app called "ArogyaAI"
+for a Smart Health hackathon track in Indore, India. Use Firebase Firestore as the
+database and the Gemini API for an AI chatbot. This is not a mockup — wire up real
+working API routes and database calls, not placeholder functions.
+DESIGN SYSTEM (match exactly):
+Colors: background #F1F4EC (light sage), ink #1B2A22, accent marigold #E0952B,
+navy #1F3A3D, risk colors green #3B8C5A / amber #C77B18 / red #B23A2E
+Fonts: 'Fraunces' (serif) for headings, 'Inter' for body, 'Noto Sans Devanagari'
+for Hindi text, 'IBM Plex Mono' for data/code
+Rounded cards (14px radius), pill-shaped buttons, a heartbeat/pulse-line SVG motif
+Bilingual UI: every screen must toggle between English and Hindi via a lang switcher
+PAGES:
+Home — hero with two portal cards: "Patient / ASHA Portal" and "District
+Management Console". Include an emergency bar pinned at top with tel: links
+to 108 (ambulance) and 112 (emergency). Brand name "ArogyaAI" in the navbar
+and page title, with the tagline "Every call is a heartbeat we're listening to."
+Patient Portal — a real AI chat interface (not scripted):
+Text input + a mic button using the Web Speech API (SpeechRecognition,
+lang='hi-IN') for Hindi voice input
+On submit, POST the message to /api/chat, which calls the Gemini API
+(gemini-2.0-flash) with a system prompt that makes it act as "Vaani", a
+calm Hindi/English health triage assistant that classifies risk as
+GREEN / YELLOW / RED and never gives medicine dosages, only advises
+calling 108 if RED
+Speak the AI's reply back out loud using SpeechSynthesis (hi-IN)
+Save every conversation (message, reply, risk, locality, timestamp) to a
+Firestore "reports" collection via the API route
+If risk is RED, show an Emergency Escalation panel that fetches hospitals
+from a Firestore "hospitals" collection, scores them by capability
+(ICU/trauma/cardiac) minus distance, and displays the best match plus
+notification cards for family/doctor/hospital/ambulance
+Management Console — tabs for Overview, Alerts, Hospitals, MP Brief:
+Overview: stat cards computed live from Firestore ("medicines" collection
+stockout formula = stock ÷ burn rate, "attendance" collection), a Leaflet +
+OpenStreetMap map of Indore with locality risk markers and hospital
+markers pulled from Firestore
+Alerts: real-time list from the "reports" collection (use onSnapshot for
+live updates), each expandable to show transcript → extracted fields →
+rule fired → alert, i.e. a full explainability trail
+Hospitals: list from Firestore with ratings and specialties
+MP Brief: a button that calls /api/brief, which pulls this week's
+Firestore data and asks Gemini to summarize it into a 3-sentence brief
+BACKEND / API ROUTES NEEDED:
+app/api/chat/route.ts — Gemini call + Firestore write (as described above)
+app/api/reports/route.ts — GET, returns latest 50 reports from Firestore
+app/api/hospitals/route.ts — GET/POST for the hospitals collection
+app/api/brief/route.ts — Gemini summarization of weekly Firestore data
+lib/firebase.ts — Firebase client init using environment variables
+Firestore collections: reports, medicines, beds, attendance, hospitals, alerts
+ENVIRONMENT VARIABLES to reference (do not hardcode keys):
+GEMINI_API_KEY, NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+NEXT_PUBLIC_FIREBASE_PROJECT_ID, NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, NEXT_PUBLIC_FIREBASE_APP_ID
+Connect to my existing Firebase project if one is already linked, so I don't
+need to manually re-enter these values.
+IMPORTANT: Keep a visible "what's real vs simulated" note somewhere in the UI —
+this is a hackathon judging criterion. Only label something as "real" if the
+API route actually calls Gemini/Firestore, not a mock function. Do NOT use the
+name "HealthPulse AI" anywhere — the product name throughout the entire app,
+including the title tag, navbar, footer, and any generated documentation, must
+be "ArogyaAI".

@@ -1,0 +1,1 @@
+- [ArogyaAI build](arogya-ai-build.md) — frontend-only health triage app; all data seeded in-memory, no backend needed; uses leaflet for Indore map.

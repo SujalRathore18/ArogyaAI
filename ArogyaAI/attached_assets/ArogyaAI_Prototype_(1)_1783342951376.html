@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArogyaAI — Smart Health, GDG Indore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --bg:#F1F4EC;
+    --bg-deep:#E7EDDE;
+    --ink:#1B2A22;
+    --ink-soft:#4C5C50;
+    --line:#D3DBC5;
+    --card:#FFFFFF;
+    --accent:#E0952B;
+    --accent-deep:#C77B18;
+    --navy:#1F3A3D;
+    --green:#3B8C5A;
+    --green-bg:#E4F1E7;
+    --amber:#C77B18;
+    --amber-bg:#FBEED9;
+    --red:#B23A2E;
+    --red-bg:#F8E3DF;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-hi:'Noto Sans Devanagari', 'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{background:var(--bg); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:var(--font-display); margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:var(--font-body); cursor:pointer;}
+  a{color:inherit;}
+  ::selection{background:var(--accent); color:#fff;}
+  .hi{font-family:var(--font-hi);}
+
+  /* NAV */
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:18px 32px; border-bottom:1px solid var(--line); background:var(--bg); position:sticky; top:0; z-index:50; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  .brand-mark{width:34px; height:34px; position:relative;}
+  .brand-name{font-family:var(--font-display); font-weight:700; font-size:1.25rem;}
+  .brand-tag{font-size:0.72rem; color:var(--ink-soft); font-family:var(--font-mono); letter-spacing:0.02em;}
+  .nav-right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .btn{border:none; border-radius:999px; padding:10px 20px; font-size:0.88rem; font-weight:600; transition:transform .15s ease, box-shadow .15s ease;}
+  .btn:active{transform:scale(0.97);}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{box-shadow:0 4px 14px rgba(31,58,61,0.3);}
+  .btn-accent{background:var(--accent); color:#fff;}
+  .btn-accent:hover{box-shadow:0 4px 14px rgba(224,149,43,0.35);}
+  .btn-red{background:var(--red); color:#fff;}
+  .btn-sm{padding:7px 14px; font-size:0.78rem; border-radius:999px;}
+  .btn-lang{background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 14px; font-size:0.8rem; font-weight:700;}
+  .btn-mic{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:1rem;}
+  .btn-mic.listening{background:var(--red-bg); border-color:var(--red); animation:pulseMic 1s infinite;}
+  @keyframes pulseMic{0%,100%{box-shadow:0 0 0 0 rgba(178,58,46,0.4);}50%{box-shadow:0 0 0 8px rgba(178,58,46,0);}}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:999px; font-size:0.72rem; font-weight:600; font-family:var(--font-mono);}
+
+  /* EMERGENCY BAR */
+  .emerg-bar{display:flex; gap:10px; align-items:center; background:var(--navy); color:#fff; padding:8px 32px; font-size:0.8rem; flex-wrap:wrap;}
+  .emerg-bar a{background:var(--red); color:#fff; padding:4px 12px; border-radius:999px; font-weight:700; text-decoration:none; font-family:var(--font-mono);}
+  .emerg-bar a.amb{background:var(--accent-deep);}
+
+  /* LAYOUT */
+  .view{display:none; max-width:1180px; margin:0 auto; padding:40px 32px 90px;}
+  .view.active{display:block;}
+  .section-eyebrow{font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-deep); font-weight:600; margin-bottom:8px;}
+
+  /* HOME HERO */
+  .hero{padding:70px 32px 40px; text-align:center; position:relative; overflow:hidden;}
+  .hero h1{font-size:clamp(2.2rem, 5vw, 3.6rem); max-width:820px; margin:0 auto 18px; line-height:1.08;}
+  .hero .sub{color:var(--ink-soft); font-size:1.08rem; max-width:600px; margin:0 auto 30px;}
+  .pulse-line{width:100%; max-width:640px; height:60px; margin:0 auto 10px;}
+  .pulse-line path{stroke:var(--accent); stroke-width:2.5; fill:none; stroke-dasharray:600; stroke-dashoffset:600; animation:draw 2.4s ease-out forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+
+  .portal-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; max-width:900px; margin:40px auto 0;}
+  @media(max-width:720px){.portal-grid{grid-template-columns:1fr;}}
+  .portal-card{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:32px; text-align:left; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; position:relative; overflow:hidden;}
+  .portal-card:hover{transform:translateY(-4px); box-shadow:0 16px 34px rgba(27,42,34,0.1);}
+  .portal-card .icon{width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; font-size:1.4rem;}
+  .portal-card.patient .icon{background:var(--green-bg); color:var(--green);}
+  .portal-card.mgmt .icon{background:#E7EEF0; color:var(--navy);}
+  .portal-card h3{font-size:1.35rem; margin-bottom:8px;}
+  .portal-card p{color:var(--ink-soft); font-size:0.92rem; line-height:1.5; margin-bottom:16px;}
+  .portal-card .go{font-weight:600; font-size:0.85rem; color:var(--accent-deep); display:flex; align-items:center; gap:6px;}
+
+  .feature-strip{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:34px;}
+  .feature-chip{background:var(--card); border:1px solid var(--line); padding:8px 14px; border-radius:999px; font-size:0.78rem; font-family:var(--font-mono); color:var(--ink-soft);}
+
+  .trust-banner{margin-top:56px; background:var(--navy); color:#fff; border-radius:18px; padding:24px 28px; display:flex; gap:20px; align-items:flex-start; text-align:left;}
+  .trust-banner .dot{width:10px;height:10px;border-radius:50%;background:var(--accent); margin-top:6px; flex-shrink:0;}
+  .trust-banner h4{color:#fff; font-size:1rem; margin-bottom:6px;}
+  .trust-banner p{color:#CBD6D2; font-size:0.87rem; line-height:1.55;}
+
+  .research-strip{margin-top:24px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 26px; text-align:left; font-size:0.82rem; color:var(--ink-soft); display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  @media(max-width:800px){.research-strip{grid-template-columns:1fr 1fr;}}
+  .research-strip b{color:var(--ink); display:block; font-size:1.15rem; font-family:var(--font-display);}
+
+  /* CARD & GRID GENERIC */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px;}
+  .grid-2{display:grid; grid-template-columns:1.3fr 1fr; gap:20px;}
+  .grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media(max-width:900px){.grid-2{grid-template-columns:1fr;} .grid-4{grid-template-columns:1fr 1fr;}}
+
+  /* PATIENT VIEW */
+  .locality-select, .text-input{width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line); font-family:var(--font-body); font-size:0.92rem; background:#fff;}
+  .scenario-row{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0;}
+  .scenario-btn{border:1px solid var(--line); background:#fff; border-radius:10px; padding:10px 14px; font-size:0.82rem; text-align:left; flex:1 1 150px;}
+  .scenario-btn:hover{border-color:var(--accent);}
+  .scenario-btn.active{border-color:var(--accent); background:var(--amber-bg);}
+
+  .phase-track{display:flex; gap:6px; margin:18px 0;}
+  .phase-dot{flex:1; height:5px; border-radius:3px; background:var(--line); transition:background .3s;}
+  .phase-dot.done{background:var(--accent);}
+
+  .call-stage{min-height:170px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:10px; padding:20px; border-radius:12px; background:var(--bg-deep);}
+  .call-stage .big-icon{font-size:2rem;}
+  .json-reveal{font-family:var(--font-mono); font-size:0.82rem; background:#152023; color:#B9E6C6; border-radius:10px; padding:16px; text-align:left; line-height:1.7; width:100%; white-space:pre-wrap;}
+
+  .risk-badge{display:inline-flex; align-items:center; gap:8px; padding:8px 18px; border-radius:999px; font-weight:700; font-size:0.95rem;}
+  .risk-green{background:var(--green-bg); color:var(--green);}
+  .risk-yellow{background:var(--amber-bg); color:var(--amber);}
+  .risk-red{background:var(--red-bg); color:var(--red);}
+
+  .notif-card{border:1px solid var(--line); border-radius:12px; padding:16px; background:#fff; margin-bottom:10px;}
+  .notif-card .tag{font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft);}
+  .hosp-pick{border:2px solid var(--green); background:var(--green-bg); border-radius:12px; padding:16px; margin-bottom:8px;}
+  .hosp-alt{border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:8px; opacity:0.7;}
+
+  /* MANAGEMENT DASHBOARD */
+  .stat-card{border:1px solid var(--line); border-radius:14px; padding:18px; background:#fff;}
+  .stat-card .num{font-family:var(--font-display); font-size:1.9rem; font-weight:700;}
+  .stat-card .lbl{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
+  .stat-card .delta{font-size:0.72rem; font-family:var(--font-mono); margin-top:8px;}
+
+  #realMap{width:100%; height:360px; border-radius:14px; border:1px solid var(--line); z-index:1;}
+  .zone-legend{display:flex; gap:16px; margin-top:10px; font-size:0.78rem; flex-wrap:wrap;}
+  .zone-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .swatch{width:10px;height:10px;border-radius:50%; display:inline-block;}
+  .leaflet-popup-content{font-family:var(--font-body); font-size:0.82rem;}
+
+  .alert-item{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px; background:#fff;}
+  .alert-item .top-row{display:flex; justify-content:space-between; align-items:center; cursor:pointer;}
+  .alert-item .evidence{display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); font-size:0.85rem; line-height:1.7;}
+  .alert-item.open .evidence{display:block;}
+  .evidence-step{font-family:var(--font-mono); font-size:0.78rem; color:var(--ink-soft); margin-bottom:4px;}
+  .evidence-step b{color:var(--ink);}
+
+  .hosp-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);}
+  .hosp-row:last-child{border-bottom:none;}
+  .stars{color:var(--accent); font-size:0.85rem;}
+
+  .tab-row{display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .tab{padding:10px 4px; margin-right:18px; font-weight:600; font-size:0.9rem; color:var(--ink-soft); border-bottom:2px solid transparent; cursor:pointer;}
+  .tab.active{color:var(--ink); border-bottom-color:var(--accent);}
+
+  .mp-brief{background:#fff; border:1px solid var(--line); border-radius:14px; padding:26px; font-size:0.92rem; line-height:1.75; display:none;}
+  .mp-brief.show{display:block;}
+  .mp-brief h4{margin-bottom:10px;}
+
+  footer{border-top:1px solid var(--line); padding:26px 32px; text-align:center; color:var(--ink-soft); font-size:0.8rem; font-family:var(--font-mono);}
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:#fff; padding:12px 22px; border-radius:999px; font-size:0.85rem; opacity:0; transition:all .3s ease; pointer-events:none; z-index:100; max-width:80vw; text-align:center;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .back-link{display:inline-flex; align-items:center; gap:6px; color:var(--ink-soft); font-size:0.85rem; margin-bottom:22px; cursor:pointer;}
+  .back-link:hover{color:var(--ink);}
+  label.field-label{font-size:0.78rem; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:6px; margin-top:14px;}
+  .agent-box{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:20px;}
+  .agent-avatar{width:44px; height:44px; border-radius:50%; background:var(--green-bg); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;}
+  .mic-row{display:flex; gap:8px; margin-top:8px;}
+
+  /* ---------------- AUTH GATE ---------------- */
+  .auth-overlay{position:fixed; inset:0; background:rgba(27,42,34,0.55); backdrop-filter:blur(3px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .auth-overlay.hidden{display:none;}
+  .auth-card{background:#fff; border-radius:20px; padding:34px 32px; width:100%; max-width:400px; box-shadow:0 24px 60px rgba(27,42,34,0.25);}
+  .auth-tabs{display:flex; gap:4px; background:var(--bg-deep); border-radius:999px; padding:4px; margin-bottom:22px;}
+  .auth-tab{flex:1; text-align:center; padding:9px 0; border-radius:999px; font-size:0.85rem; font-weight:600; cursor:pointer; color:var(--ink-soft);}
+  .auth-tab.active{background:#fff; color:var(--ink); box-shadow:0 2px 8px rgba(27,42,34,0.08);}
+  .auth-field{width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line); font-family:var(--font-body); font-size:0.9rem; margin-bottom:12px;}
+  .auth-guest{display:block; text-align:center; margin-top:14px; font-size:0.8rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline;}
+  .auth-error{color:var(--red); font-size:0.78rem; margin:-4px 0 10px; display:none;}
+  .auth-error.show{display:block;}
+
+  /* ---------------- SOS BUTTON ---------------- */
+  .sos-btn{position:fixed; right:22px; bottom:22px; z-index:90; width:64px; height:64px; border-radius:50%; background:var(--red); color:#fff; border:none; font-weight:700; font-size:0.72rem; font-family:var(--font-mono); box-shadow:0 10px 26px rgba(178,58,46,0.45); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; animation:sosPulse 2s infinite;}
+  @keyframes sosPulse{0%,100%{box-shadow:0 0 0 0 rgba(178,58,46,0.45), 0 10px 26px rgba(178,58,46,0.45);} 50%{box-shadow:0 0 0 12px rgba(178,58,46,0), 0 10px 26px rgba(178,58,46,0.45);}}
+
+  /* ---------------- CHATBOT WIDGET (bottom-left) ---------------- */
+  .chat-toggle{position:fixed; left:22px; bottom:22px; z-index:90; width:60px; height:60px; border-radius:50%; background:var(--navy); color:#fff; border:none; font-size:1.5rem; box-shadow:0 10px 26px rgba(31,58,61,0.4); display:flex; align-items:center; justify-content:center;}
+  .chat-window{position:fixed; left:22px; bottom:94px; z-index:95; width:340px; max-width:88vw; max-height:min(70vh,520px); background:#fff; border-radius:18px; border:1px solid var(--line); box-shadow:0 24px 60px rgba(27,42,34,0.28); display:none; flex-direction:column; overflow:hidden;}
+  .chat-window.open{display:flex;}
+  .chat-head{background:var(--navy); color:#fff; padding:14px 16px; display:flex; align-items:center; gap:10px;}
+  .chat-head .agent-avatar{background:rgba(255,255,255,0.15); width:36px; height:36px; font-size:1.05rem;}
+  .chat-head .meta b{display:block; font-size:0.88rem;}
+  .chat-head .meta span{font-size:0.7rem; color:#CBD6D2;}
+  .chat-close{margin-left:auto; background:none; border:none; color:#fff; font-size:1.1rem; opacity:0.8;}
+  .chat-body{flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; background:var(--bg);}
+  .chat-msg{max-width:85%; padding:9px 13px; border-radius:14px; font-size:0.84rem; line-height:1.5;}
+  .chat-msg.bot{background:#fff; border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:4px;}
+  .chat-msg.user{background:var(--navy); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+  .chat-quick{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+  .chat-quick button{border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 11px; font-size:0.74rem; color:var(--ink);}
+  .chat-quick button:hover{border-color:var(--accent);}
+  .chat-input-row{display:flex; gap:6px; padding:10px; border-top:1px solid var(--line); background:#fff;}
+  .chat-input-row input{flex:1; border:1px solid var(--line); border-radius:999px; padding:9px 14px; font-size:0.83rem;}
+  .chat-input-row button{border:none; border-radius:50%; width:36px; height:36px; flex-shrink:0; font-size:0.95rem;}
+  .chat-send{background:var(--accent); color:#fff;}
+  .chat-mic{background:var(--bg-deep); color:var(--ink);}
+  .chat-mic.listening{background:var(--red-bg); color:var(--red); animation:pulseMic 1s infinite;}
+
+  /* ---------------- BLOG / INFO PAGES ---------------- */
+  .blog-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
+  @media(max-width:800px){.blog-grid{grid-template-columns:1fr;}}
+  .blog-card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:22px; overflow:hidden;}
+  .blog-card .tag2{display:inline-block; font-family:var(--font-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; background:var(--green-bg); color:var(--green); padding:3px 10px; border-radius:999px; margin-bottom:10px;}
+  .blog-card.risk-tag-red .tag2{background:var(--red-bg); color:var(--red);}
+  .blog-card.risk-tag-orange .tag2{background:var(--amber-bg); color:var(--amber);}
+  .blog-card h4{font-size:1.05rem; margin-bottom:8px;}
+  .blog-card p{color:var(--ink-soft); font-size:0.86rem; line-height:1.6;}
+  .doctor-card{display:flex; gap:14px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:10px;}
+  .doctor-card .dav{width:46px; height:46px; border-radius:50%; background:var(--bg-deep); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;}
+  .doctor-card .name{font-weight:700; font-size:0.92rem;}
+  .doctor-card .spec{font-size:0.78rem; color:var(--ink-soft);}
+  .avail-dot{display:inline-flex; align-items:center; gap:5px; font-size:0.72rem; font-family:var(--font-mono); font-weight:600; margin-top:4px;}
+  .avail-dot .d{width:8px; height:8px; border-radius:50%;}
+  .chs-card{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-bottom:8px;}
+  .chs-score{font-family:var(--font-display); font-weight:700; font-size:1.3rem;}
+</style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="brand" style="justify-content:center; margin-bottom:18px;">
+      <svg class="brand-mark" viewBox="0 0 34 34"><circle cx="17" cy="17" r="16" fill="#1F3A3D"/><path d="M6 17h5l2.5-8 4 16 2.5-8H28" stroke="#E0952B" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="brand-name">ArogyaAI</div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Login</div>
+      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</div>
+    </div>
+    <div id="authError" class="auth-error"></div>
+    <div id="authFormLogin">
+      <input class="auth-field" id="loginPhone" placeholder="Mobile number / फ़ोन नंबर" maxlength="10">
+      <input class="auth-field" id="loginPass" type="password" placeholder="Password">
+      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Login</button>
+    </div>
+    <div id="authFormRegister" style="display:none;">
+      <input class="auth-field" id="regName" placeholder="Full name / पूरा नाम">
+      <input class="auth-field" id="regPhone" placeholder="Mobile number / फ़ोन नंबर" maxlength="10">
+      <input class="auth-field" id="regPass" type="password" placeholder="Create password">
+      <select class="auth-field" id="regRole">
+        <option value="patient">I'm a Patient / ASHA worker</option>
+        <option value="mgmt">I'm District Management staff</option>
+      </select>
+      <button class="btn btn-primary" style="width:100%;" onclick="doRegister()">Create account</button>
+    </div>
+    <div class="auth-guest" onclick="enterGuest()">Continue as guest (demo mode) →</div>
+  </div>
+</div>
+
+<div class="emerg-bar">
+  <span data-i18n="emerg.label">🚨 Rural / low-connectivity? Call direct:</span>
+  <a href="tel:108" class="amb">📞 108 — Ambulance</a>
+  <a href="tel:112">📞 112 — Emergency</a>
+</div>
+
+<nav class="nav">
+  <div class="brand" onclick="go('home')">
+    <svg class="brand-mark" viewBox="0 0 34 34"><circle cx="17" cy="17" r="16" fill="#1F3A3D"/><path d="M6 17h5l2.5-8 4 16 2.5-8H28" stroke="#E0952B" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <div class="brand-name">ArogyaAI</div>
+      <div class="brand-tag" data-i18n="nav.tag">Every call is a heartbeat we're listening to</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="btn-ghost btn" onclick="go('patientblog')" style="border:1px solid var(--line);">📰 Patient Blog</button>
+    <button class="btn-ghost btn" onclick="go('hospitalinfo')" style="border:1px solid var(--line);">🏥 Hospitals & Doctors</button>
+    <button class="btn-lang" onclick="setLang(currentLang==='en'?'hi':'en')" id="langBtn">हिंदी</button>
+    <span id="navGuestBtns">
+      <button class="btn btn-ghost" data-i18n="nav.register" onclick="openAuth('register')">Register</button>
+      <button class="btn btn-primary" data-i18n="nav.login" onclick="openAuth('login')">Login</button>
+    </span>
+    <span id="navUserBtns" style="display:none; align-items:center; gap:8px;">
+      <span style="font-size:0.85rem; font-weight:600;" id="navUserName"></span>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+    </span>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="view-home" class="view active">
+  <div class="hero">
+    <svg class="pulse-line" viewBox="0 0 640 60"><path d="M0 30 H220 L245 10 L265 50 L285 5 L305 55 L325 30 H640"/></svg>
+    <div class="section-eyebrow" data-i18n="home.eyebrow">Build with AI · Code for Communities · Track 3, Smart Health</div>
+    <h1 data-i18n="home.h1">One pipeline, from a village phone call<br>to a district that acts on it.</h1>
+    <p class="sub" data-i18n="home.sub">ArogyaAI turns voice reports from ASHA workers and patients into live medicine-stock alerts, risk-classified emergencies, and one weekly brief an MP's office can act on — in Hindi or English, by voice or text.</p>
+    <div class="portal-grid">
+      <div class="portal-card patient" onclick="go('patient')">
+        <div class="icon">📞</div>
+        <h3 data-i18n="home.patientTitle">Patient / ASHA Portal</h3>
+        <p data-i18n="home.patientDesc">Speak or type a symptom in Hindi or English. Get an AI risk read, a spoken-back reply from the Hindi voice agent, and — if it's serious — an emergency team already in motion before you hang up.</p>
+        <div class="go" data-i18n="home.patientGo">Open patient portal →</div>
+      </div>
+      <div class="portal-card mgmt" onclick="go('mgmt')">
+        <div class="icon">🏥</div>
+        <h3 data-i18n="home.mgmtTitle">District Management Console</h3>
+        <p data-i18n="home.mgmtDesc">Live medicine stock, bed availability, doctor attendance, a real Indore catchment map, and every alert traced back to the exact call that triggered it.</p>
+        <div class="go" data-i18n="home.mgmtGo">Open management console →</div>
+      </div>
+    </div>
+    <div class="feature-strip">
+      <span class="feature-chip" data-i18n="chip1">Hindi Voice AI Agent</span>
+      <span class="feature-chip" data-i18n="chip2">Stockout Forecasting</span>
+      <span class="feature-chip" data-i18n="chip3">Emergency Hospital Matching</span>
+      <span class="feature-chip" data-i18n="chip4">Explainability Trail</span>
+      <span class="feature-chip" data-i18n="chip5">Real Indore Map</span>
+    </div>
+
+    <div class="research-strip">
+      <div><b>50+</b>Government hospitals in Indore</div>
+      <div><b>100+</b>Private hospitals & nursing homes</div>
+      <div><b>108 / 112</b>Ambulance / Emergency numbers</div>
+      <div><b>4</b>Medical colleges — MGM, SAIMS, Index, Amaltas</div>
+    </div>
+
+    <div class="trust-banner">
+      <div class="dot"></div>
+      <div>
+        <h4 data-i18n="trust.h">Judge Trust Note — what's real vs. simulated in this prototype</h4>
+        <p data-i18n="trust.p">Real, running live in your browser: the stockout formula, the cluster rule, doctor-attendance correlation, the hospital capability-vs-distance matcher, the real OpenStreetMap of Indore with actual hospital locations, the Hindi voice agent (speech synthesis) and Hindi speech-to-text input (on supported browsers) — all computing against seeded PHC data. Simulated for demo reliability: the "AI extraction" step replays rule-based keyword classification rather than a live Gemini call, and phone/SMS delivery is shown as on-screen notification cards, not real dispatch. Both are honestly labelled throughout.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT VIEW -->
+<div id="view-patient" class="view">
+  <div class="back-link" onclick="go('home')" data-i18n="back">← Back to home</div>
+  <div class="section-eyebrow" data-i18n="patient.eyebrow">Patient / ASHA Portal</div>
+  <h2 style="font-size:1.7rem; margin-bottom:16px;" data-i18n="patient.h2">Report a symptom</h2>
+
+  <div class="agent-box">
+    <div class="agent-avatar">🙋‍♀️</div>
+    <div style="flex:1;">
+      <p style="font-weight:600; font-size:0.9rem;" data-i18n="agent.name">Hindi AI Health Agent — "Vaani"</p>
+      <p style="font-size:0.8rem; color:var(--ink-soft);" data-i18n="agent.desc">Tap to hear Vaani introduce herself in Hindi. She'll listen to your report and speak the advice back — built for callers who can't read or type easily.</p>
+    </div>
+    <button class="btn btn-accent btn-sm" onclick="playGreeting()">🔊 <span data-i18n="agent.play">Sunein</span></button>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <label class="field-label" data-i18n="patient.pickScenario">Choose a scripted scenario (90-second judge demo)</label>
+      <div class="scenario-row" id="scenarioRow"></div>
+      <label class="field-label" data-i18n="patient.liveLabel">— or speak / type a live report yourself (Hindi or English)</label>
+      <textarea id="liveText" class="text-input hi" rows="3" placeholder="उदाहरण: मेरे बेटे को 3 दिन से तेज़ बुखार है और साँस लेने में तकलीफ़ हो रही है"></textarea>
+      <div class="mic-row">
+        <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="Speak in Hindi">🎤 <span data-i18n="patient.speak">बोलें / Speak</span></button>
+        <span id="micStatus" style="font-size:0.78rem; color:var(--ink-soft); align-self:center;"></span>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+        <select id="localitySelect" class="locality-select" style="max-width:220px;">
+          <option>Banganga</option><option>Rau</option><option>Vijay Nagar</option><option>Palasia</option><option>Sudama Nagar</option>
+        </select>
+        <button class="btn btn-accent" onclick="startCall()">📞 <span data-i18n="patient.placeCall">Place the call</span></button>
+      </div>
+
+      <div class="phase-track" id="phaseTrack"></div>
+      <div class="call-stage" id="callStage">
+        <div class="big-icon">🎙️</div>
+        <p style="color:var(--ink-soft); font-size:0.9rem;" data-i18n="patient.waiting">Pick a scenario above, or type/speak your own, then place the call.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:1.05rem; margin-bottom:12px;" data-i18n="patient.riskChart">AI Risk Chart</h3>
+      <div id="riskPanel">
+        <p style="color:var(--ink-soft); font-size:0.88rem;" data-i18n="patient.waitingClassify">Waiting for a call to classify…</p>
+      </div>
+      <div id="vaaniBox" style="margin-top:18px; display:none;">
+        <label class="field-label" style="margin-top:0;" data-i18n="patient.vaaniLabel">Vaani Callback — spoken reply to caller</label>
+        <div style="display:flex; align-items:center; gap:10px; background:var(--bg-deep); border-radius:10px; padding:12px 14px;">
+          <span style="font-size:1.2rem;">🔊</span>
+          <p id="vaaniText" class="hi" style="font-size:0.9rem; flex:1;"></p>
+        </div>
+        <p style="font-size:0.7rem; color:var(--ink-soft); margin-top:6px; font-family:var(--font-mono);" data-i18n="patient.vaaniNote">Browser SpeechSynthesis (hi-IN) — stands in for Google Cloud Text-to-Speech in production.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="emergencySection" style="display:none; margin-top:26px;">
+    <div class="section-eyebrow" style="color:var(--red);" data-i18n="patient.emergEyebrow">Emergency Escalation Layer — Red Risk</div>
+    <h3 style="margin-bottom:16px;" data-i18n="patient.emergH">Coordinating the best hospital — not just the nearest one</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div id="hospMatchBox"></div>
+      </div>
+      <div class="card">
+        <h4 style="font-size:0.95rem; margin-bottom:12px;" data-i18n="patient.notifSent">Notifications sent</h4>
+        <div id="notifBox"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGEMENT VIEW -->
+<div id="view-mgmt" class="view">
+  <div class="back-link" onclick="go('home')" data-i18n="back">← Back to home</div>
+  <div class="section-eyebrow" data-i18n="mgmt.eyebrow">District Management Console</div>
+  <h2 style="font-size:1.7rem; margin-bottom:22px;" data-i18n="mgmt.h2">Indore District — Smart Health Dashboard</h2>
+
+  <div class="tab-row">
+    <div class="tab active" data-tab="overview" onclick="switchTab('overview')" data-i18n="tab.overview">Overview</div>
+    <div class="tab" data-tab="alerts" onclick="switchTab('alerts')" data-i18n="tab.alerts">Alerts & Explainability</div>
+    <div class="tab" data-tab="hospitals" onclick="switchTab('hospitals')" data-i18n="tab.hospitals">Hospitals & Ratings</div>
+    <div class="tab" data-tab="brief" onclick="switchTab('brief')" data-i18n="tab.brief">MP Weekly Brief</div>
+  </div>
+
+  <div class="tabpane" id="tab-overview">
+    <div class="grid-4" style="margin-bottom:20px;" id="statGrid"></div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="font-size:1rem; margin-bottom:10px;" data-i18n="mgmt.mapTitle">Real Indore catchment map (OpenStreetMap)</h3>
+        <div id="realMap"></div>
+        <div class="zone-legend">
+          <span><i class="swatch" style="background:var(--red);"></i> <span data-i18n="legend.red">Red — critical (cluster/stockout active)</span></span>
+          <span><i class="swatch" style="background:var(--amber);"></i> <span data-i18n="legend.orange">Orange — basic (watch)</span></span>
+          <span><i class="swatch" style="background:#3E7CB1;"></i> <span data-i18n="legend.blue">Blue — normal</span></span>
+          <span><i class="swatch" style="background:#1F3A3D;"></i> <span data-i18n="legend.hosp">Hospital</span></span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem; margin-bottom:10px;" data-i18n="mgmt.footfallTitle">Patient footfall — last 7 days</h3>
+        <div id="footfallChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-alerts" style="display:none;">
+    <div class="card">
+      <h3 style="font-size:1rem; margin-bottom:14px;" data-i18n="mgmt.feedTitle">Live alert feed</h3>
+      <div id="alertFeed"></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-hospitals" style="display:none;">
+    <div class="card">
+      <h3 style="font-size:1rem; margin-bottom:6px;" data-i18n="mgmt.hospTitle">Partner hospital directory — Indore</h3>
+      <p style="font-size:0.8rem; color:var(--ink-soft); margin-bottom:14px;" data-i18n="mgmt.hospNote">Ratings reflect approximate public user ratings; distance is calculated live from the selected locality using real coordinates.</p>
+      <div id="hospList"></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-brief" style="display:none;">
+    <div class="card">
+      <h3 style="font-size:1rem; margin-bottom:6px;" data-i18n="mgmt.briefTitle">Generate the MP's weekly one-pager</h3>
+      <p style="font-size:0.8rem; color:var(--ink-soft); margin-bottom:14px;" data-i18n="mgmt.briefNote">Turns this week's dashboard into three sentences an MP's office can act on immediately.</p>
+      <button class="btn btn-accent" onclick="generateBrief()" data-i18n="mgmt.briefBtn">Generate MP Brief</button>
+      <div class="mp-brief" id="mpBrief"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT BLOG -->
+<div id="view-patientblog" class="view">
+  <div class="back-link" onclick="go('home')">← Back to home</div>
+  <div class="section-eyebrow">Patient Blog</div>
+  <h2 style="font-size:1.7rem; margin-bottom:6px;">Simple health guidance for common Indore complaints</h2>
+  <p style="color:var(--ink-soft); font-size:0.9rem; margin-bottom:22px;">Short, plain-language cards — written for a first read on a small phone screen. Not a replacement for a doctor visit.</p>
+  <div class="blog-grid" id="patientBlogGrid"></div>
+</div>
+
+<!-- HOSPITAL / DOCTOR INFO BLOG -->
+<div id="view-hospitalinfo" class="view">
+  <div class="back-link" onclick="go('home')">← Back to home</div>
+  <div class="section-eyebrow">Hospitals & Doctors</div>
+  <h2 style="font-size:1.7rem; margin-bottom:6px;">Public directory — hospitals, doctors on duty, medicine availability</h2>
+  <p style="color:var(--ink-soft); font-size:0.9rem; margin-bottom:22px;">Same live seeded data that powers the district console, shown here for patients and families to browse directly.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="font-size:1rem; margin-bottom:12px;">Doctors on duty today</h3>
+      <div id="doctorDirectory"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:1rem; margin-bottom:12px;">Medicine availability (PHC network)</h3>
+      <div id="medStockPublic"></div>
+      <h3 style="font-size:1rem; margin:20px 0 12px;">Community Health Score, by zone</h3>
+      <div id="chsPublic"></div>
+    </div>
+  </div>
+  <h3 style="font-size:1rem; margin:26px 0 12px;">Hospital directory</h3>
+  <div class="card"><div id="hospListPublic"></div></div>
+</div>
+
+<footer>AROGYAAI · Track 3 Smart Health · Build with AI: Code for Communities — GDG Indore, 5 July 2026 · Ambulance 108 · Emergency 112 · Prototype build, not a finished spec</footer>
+<div class="toast" id="toast"></div>
+
+<!-- SOS BUTTON -->
+<button class="sos-btn" onclick="triggerSOS()">🆘<span>SOS</span></button>
+
+<!-- CHATBOT WIDGET -->
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
+<div class="chat-window" id="chatWindow">
+  <div class="chat-head">
+    <div class="agent-avatar">🙋‍♀️</div>
+    <div class="meta"><b>Vaani — AI Health Assistant</b><span>Site help + symptom triage · Hindi/English</span></div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-input-row">
+    <button class="chat-mic" id="chatMicBtn" onclick="toggleChatMic()" title="Speak">🎤</button>
+    <input id="chatInput" placeholder="Type your problem…" onkeydown="if(event.key==='Enter') sendChat()">
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ---------------- I18N ---------------- */
+let currentLang = 'en';
+const I18N = {
+en:{
+ "nav.tag":"Every call is a heartbeat we're listening to",
+ "nav.register":"Register", "nav.login":"Login",
+ "emerg.label":"🚨 Rural / low-connectivity? Call direct:",
+ "home.eyebrow":"Build with AI · Code for Communities · Track 3, Smart Health",
+ "home.h1":"One pipeline, from a village phone call<br>to a district that acts on it.",
+ "home.sub":"ArogyaAI turns voice reports from ASHA workers and patients into live medicine-stock alerts, risk-classified emergencies, and one weekly brief an MP's office can act on — in Hindi or English, by voice or text.",
+ "home.patientTitle":"Patient / ASHA Portal",
+ "home.patientDesc":"Speak or type a symptom in Hindi or English. Get an AI risk read, a spoken-back reply from the Hindi voice agent, and — if it's serious — an emergency team already in motion before you hang up.",
+ "home.patientGo":"Open patient portal →",
+ "home.mgmtTitle":"District Management Console",
+ "home.mgmtDesc":"Live medicine stock, bed availability, doctor attendance, a real Indore catchment map, and every alert traced back to the exact call that triggered it.",
+ "home.mgmtGo":"Open management console →",
+ "chip1":"Hindi Voice AI Agent","chip2":"Stockout Forecasting","chip3":"Emergency Hospital Matching","chip4":"Explainability Trail","chip5":"Real Indore Map",
+ "trust.h":"Judge Trust Note — what's real vs. simulated in this prototype",
+ "trust.p":"Real, running live in your browser: the stockout formula, the cluster rule, doctor-attendance correlation, the hospital capability-vs-distance matcher, the real OpenStreetMap of Indore with actual hospital locations, the Hindi voice agent (speech synthesis) and Hindi speech-to-text input (on supported browsers) — all computing against seeded PHC data. Simulated for demo reliability: the \"AI extraction\" step replays rule-based keyword classification rather than a live Gemini call, and phone/SMS delivery is shown as on-screen notification cards, not real dispatch. Both are honestly labelled throughout.",
+ "back":"← Back to home",
+ "patient.eyebrow":"Patient / ASHA Portal","patient.h2":"Report a symptom",
+ "agent.name":'Hindi AI Health Agent — "Vaani"',
+ "agent.desc":"Tap to hear Vaani introduce herself in Hindi. She'll listen to your report and speak the advice back — built for callers who can't read or type easily.",
+ "agent.play":"Sunein",
+ "patient.pickScenario":"Choose a scripted scenario (90-second judge demo)",
+ "patient.liveLabel":"— or speak / type a live report yourself (Hindi or English)",
+ "patient.speak":"बोलें / Speak",
+ "patient.placeCall":"Place the call",
+ "patient.waiting":"Pick a scenario above, or type/speak your own, then place the call.",
+ "patient.riskChart":"AI Risk Chart","patient.waitingClassify":"Waiting for a call to classify…",
+ "patient.vaaniLabel":"Vaani Callback — spoken reply to caller",
+ "patient.vaaniNote":"Browser SpeechSynthesis (hi-IN) — stands in for Google Cloud Text-to-Speech in production.",
+ "patient.emergEyebrow":"Emergency Escalation Layer — Red Risk",
+ "patient.emergH":"Coordinating the best hospital — not just the nearest one",
+ "patient.notifSent":"Notifications sent",
+ "mgmt.eyebrow":"District Management Console","mgmt.h2":"Indore District — Smart Health Dashboard",
+ "tab.overview":"Overview","tab.alerts":"Alerts & Explainability","tab.hospitals":"Hospitals & Ratings","tab.brief":"MP Weekly Brief",
+ "mgmt.mapTitle":"Real Indore catchment map (OpenStreetMap)",
+ "legend.red":"Red — critical (cluster/stockout active)","legend.orange":"Orange — basic (watch)","legend.blue":"Blue — normal","legend.hosp":"Hospital",
+ "mgmt.footfallTitle":"Patient footfall — last 7 days",
+ "mgmt.feedTitle":"Live alert feed",
+ "mgmt.hospTitle":"Partner hospital directory — Indore",
+ "mgmt.hospNote":"Ratings reflect approximate public user ratings; distance is calculated live from the selected locality using real coordinates.",
+ "mgmt.briefTitle":"Generate the MP's weekly one-pager",
+ "mgmt.briefNote":"Turns this week's dashboard into three sentences an MP's office can act on immediately.",
+ "mgmt.briefBtn":"Generate MP Brief",
+ "toast.demo":"Demo mode — this action is simulated for the hackathon prototype"
+},
+hi:{
+ "nav.tag":"हर कॉल एक धड़कन है जिसे हम सुन रहे हैं",
+ "nav.register":"रजिस्टर", "nav.login":"लॉगिन",
+ "emerg.label":"🚨 ग्रामीण / नेटवर्क कमज़ोर? सीधे कॉल करें:",
+ "home.eyebrow":"बिल्ड विद एआई · कोड फॉर कम्युनिटीज़ · ट्रैक 3, स्मार्ट हेल्थ",
+ "home.h1":"गाँव के एक फ़ोन कॉल से<br>ज़िले की कार्रवाई तक — एक ही पाइपलाइन।",
+ "home.sub":"ArogyaAI, आशा कार्यकर्ताओं और मरीज़ों की आवाज़ रिपोर्ट को दवा-स्टॉक अलर्ट, जोखिम-वर्गीकृत आपात स्थितियों, और सांसद कार्यालय के लिए साप्ताहिक ब्रीफ़ में बदलता है — हिंदी या अंग्रेज़ी में, आवाज़ या टेक्स्ट से।",
+ "home.patientTitle":"मरीज़ / आशा पोर्टल",
+ "home.patientDesc":"हिंदी या अंग्रेज़ी में लक्षण बोलें या लिखें। AI जोखिम आकलन पाएं, हिंदी वॉइस एजेंट से जवाब सुनें — और अगर गंभीर है, तो फ़ोन रखने से पहले ही आपातकालीन टीम काम शुरू कर देगी।",
+ "home.patientGo":"मरीज़ पोर्टल खोलें →",
+ "home.mgmtTitle":"ज़िला प्रबंधन कंसोल",
+ "home.mgmtDesc":"लाइव दवा स्टॉक, बेड उपलब्धता, डॉक्टर उपस्थिति, इंदौर का असली नक्शा, और हर अलर्ट उस असली कॉल तक ट्रेस किया गया जिसने उसे ट्रिगर किया।",
+ "home.mgmtGo":"प्रबंधन कंसोल खोलें →",
+ "chip1":"हिंदी वॉइस AI एजेंट","chip2":"स्टॉकआउट पूर्वानुमान","chip3":"आपातकालीन अस्पताल मिलान","chip4":"व्याख्या ट्रेल","chip5":"असली इंदौर नक्शा",
+ "trust.h":"जज ट्रस्ट नोट — इस प्रोटोटाइप में क्या असली है, क्या सिमुलेटेड",
+ "trust.p":"असली, आपके ब्राउज़र में लाइव चल रहा है: स्टॉकआउट फ़ॉर्मूला, क्लस्टर नियम, डॉक्टर-उपस्थिति सहसंबंध, अस्पताल क्षमता-बनाम-दूरी मिलानकर्ता, इंदौर का असली OpenStreetMap नक्शा असली अस्पताल स्थानों के साथ, हिंदी वॉइस एजेंट (स्पीच सिंथेसिस) और हिंदी स्पीच-टू-टेक्स्ट इनपुट (सपोर्टेड ब्राउज़रों पर) — यह सब सीड की गई PHC डेटा पर काम करता है। डेमो की विश्वसनीयता के लिए सिमुलेटेड: \"AI एक्सट्रैक्शन\" चरण एक लाइव Gemini कॉल के बजाय नियम-आधारित कीवर्ड वर्गीकरण दोहराता है, और फ़ोन/SMS डिलीवरी ऑन-स्क्रीन नोटिफिकेशन कार्ड के रूप में दिखाई जाती है, असली डिस्पैच नहीं। दोनों को स्पष्ट रूप से लेबल किया गया है।",
+ "back":"← होम पर वापस जाएं",
+ "patient.eyebrow":"मरीज़ / आशा पोर्टल","patient.h2":"एक लक्षण रिपोर्ट करें",
+ "agent.name":'हिंदी AI हेल्थ एजेंट — "वाणी"',
+ "agent.desc":"वाणी को हिंदी में अपना परिचय सुनने के लिए टैप करें। वह आपकी रिपोर्ट सुनेगी और सलाह वापस बोलकर बताएगी — उन कॉलर के लिए जो आसानी से पढ़ या टाइप नहीं कर सकते।",
+ "agent.play":"सुनें",
+ "patient.pickScenario":"एक स्क्रिप्टेड परिदृश्य चुनें (90-सेकंड जज डेमो)",
+ "patient.liveLabel":"— या खुद बोलें / टाइप करें (हिंदी या अंग्रेज़ी)",
+ "patient.speak":"बोलें / Speak",
+ "patient.placeCall":"कॉल करें",
+ "patient.waiting":"ऊपर एक परिदृश्य चुनें, या अपना खुद टाइप/बोलें, फिर कॉल करें।",
+ "patient.riskChart":"AI जोखिम चार्ट","patient.waitingClassify":"कॉल के वर्गीकरण की प्रतीक्षा है…",
+ "patient.vaaniLabel":"वाणी कॉलबैक — कॉलर को बोला गया जवाब",
+ "patient.vaaniNote":"ब्राउज़र स्पीच सिंथेसिस (hi-IN) — प्रोडक्शन में Google Cloud Text-to-Speech का स्थानापन्न।",
+ "patient.emergEyebrow":"आपातकालीन एस्केलेशन लेयर — रेड रिस्क",
+ "patient.emergH":"सबसे अच्छे अस्पताल का समन्वय — सिर्फ़ सबसे नज़दीकी का नहीं",
+ "patient.notifSent":"भेजी गई सूचनाएं",
+ "mgmt.eyebrow":"ज़िला प्रबंधन कंसोल","mgmt.h2":"इंदौर ज़िला — स्मार्ट हेल्थ डैशबोर्ड",
+ "tab.overview":"अवलोकन","tab.alerts":"अलर्ट और व्याख्या","tab.hospitals":"अस्पताल और रेटिंग","tab.brief":"सांसद साप्ताहिक ब्रीफ़",
+ "mgmt.mapTitle":"इंदौर का असली नक्शा (OpenStreetMap)",
+ "legend.red":"लाल — गंभीर (क्लस्टर/स्टॉकआउट सक्रिय)","legend.orange":"नारंगी — सामान्य निगरानी","legend.blue":"नीला — सामान्य","legend.hosp":"अस्पताल",
+ "mgmt.footfallTitle":"मरीज़ों की संख्या — पिछले 7 दिन",
+ "mgmt.feedTitle":"लाइव अलर्ट फ़ीड",
+ "mgmt.hospTitle":"साझेदार अस्पताल निर्देशिका — इंदौर",
+ "mgmt.hospNote":"रेटिंग अनुमानित सार्वजनिक उपयोगकर्ता रेटिंग को दर्शाती है; दूरी चुनी गई लोकैलिटी से असली निर्देशांक के आधार पर लाइव गणना की जाती है।",
+ "mgmt.briefTitle":"सांसद का साप्ताहिक वन-पेजर बनाएं",
+ "mgmt.briefNote":"इस सप्ताह के डैशबोर्ड को तीन वाक्यों में बदलता है जिन पर सांसद कार्यालय तुरंत कार्रवाई कर सकता है।",
+ "mgmt.briefBtn":"सांसद ब्रीफ़ बनाएं",
+ "toast.demo":"डेमो मोड — यह क्रिया हैकाथॉन प्रोटोटाइप के लिए सिम्युलेटेड है"
+}
+};
+function t(key){ return I18N[currentLang][key] || I18N.en[key] || key; }
+function setLang(lang){
+  currentLang = lang;
+  document.getElementById('langBtn').textContent = lang==='en' ? 'हिंदी' : 'English';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.innerHTML = t(el.getAttribute('data-i18n'));
+  });
+  renderMgmt();
+}
+
+/* ---------------- SEED DATA (real Indore context) ---------------- */
+const INDORE_CENTER = [22.7196, 75.8577];
+const localities = ["Banganga","Rau","Vijay Nagar","Palasia","Sudama Nagar"];
+const zoneRisk = {"Banganga":"red","Rau":"orange","Sudama Nagar":"orange","Vijay Nagar":"blue","Palasia":"blue"};
+const localityCoords = {
+  "Banganga":[22.7386,75.8531], "Rau":[22.6165,75.7671], "Vijay Nagar":[22.7521,75.8937],
+  "Palasia":[22.7279,75.8828], "Sudama Nagar":[22.6934,75.8774]
+};
+
+const medicines = [
+  {name:"ORS packets", stock:120, burn:40},
+  {name:"Paracetamol 500mg", stock:300, burn:60},
+  {name:"Azithromycin 500mg", stock:40, burn:20},
+  {name:"Metformin 500mg", stock:250, burn:50},
+  {name:"Insulin (vials)", stock:18, burn:6},
+  {name:"Amoxicillin", stock:20, burn:18}
+];
+
+const doctorAttendance = [
+  {phc:"PHC Banganga", present:3, total:6},
+  {phc:"PHC Rau", present:5, total:6},
+  {phc:"PHC Sudama Nagar", present:4, total:6},
+  {phc:"PHC Palasia", present:6, total:6}
+];
+
+const footfall = [62,71,58,80,95,88,101];
+
+/* Real Indore hospitals — approx coordinates, public specialties, approx public ratings */
+const hospitals = [
+  {name:"M.Y. Hospital (Govt. / MGM Medical College)", lat:22.7182, lng:75.8477, beds:6, icu:true, trauma:true, cardiac:false, specialties:["Trauma & Emergency","General Medicine","Critical Care"], reviews:3.2},
+  {name:"Apollo Hospitals Indore", lat:22.7460, lng:75.8934, beds:5, icu:true, trauma:false, cardiac:true, specialties:["Cardiology","Oncology","Robotic Surgery"], reviews:4.8},
+  {name:"CARE CHL Hospital", lat:22.6981, lng:75.8791, beds:3, icu:true, trauma:false, cardiac:true, specialties:["Cardiology","Nephrology","Critical Care"], reviews:4.6},
+  {name:"Bombay Hospital Indore", lat:22.6889, lng:75.8482, beds:8, icu:true, trauma:true, cardiac:false, specialties:["Orthopedics","Neurology","Trauma & Emergency"], reviews:4.3},
+  {name:"Choithram Hospital", lat:22.7061, lng:75.8703, beds:4, icu:true, trauma:false, cardiac:true, specialties:["Cardiology","Oncology"], reviews:4.4},
+  {name:"Shalby Hospital", lat:22.7479, lng:75.8911, beds:3, icu:false, trauma:false, cardiac:false, specialties:["Orthopedics","Robotic Surgery"], reviews:4.7},
+  {name:"Vishesh Jupiter Hospital", lat:22.7301, lng:75.9022, beds:4, icu:true, trauma:false, cardiac:false, specialties:["Gastroenterology","Gynecology","Critical Care"], reviews:4.7},
+  {name:"Bhandari Hospital", lat:22.7135, lng:75.8593, beds:5, icu:false, trauma:false, cardiac:false, specialties:["Pediatrics","Gynecology","General Medicine"], reviews:4.7}
+];
+
+function haversineKm(a,b){
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b[0]-a[0]), dLng=toRad(b[1]-a[1]);
+  const x = Math.sin(dLat/2)**2 + Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+/* scenarios grounded in common Indore diseases */
+const scenarios = [
+  {label:"Dengue-suspect cluster · Banganga", locality:"Banganga", transcript_en:"ASHA report: 5th case this week of high fever, body ache and skin rash in Banganga — suspect dengue.", risk:"yellow", symptoms:"High fever, body ache, rash — suspect dengue", severity:"Moderate", age:9},
+  {label:"Chest pain (heart) · Rau", locality:"Rau", transcript_en:"Caller reports father, 58, sudden chest pain and breathlessness, sweating, unable to walk.", risk:"red", symptoms:"Chest pain, breathlessness, sweating — suspect cardiac event", severity:"Critical", age:58},
+  {label:"Hypertension checkup · Vijay Nagar", locality:"Vijay Nagar", transcript_en:"Caller wants a routine blood-pressure recheck, no acute complaints, medicines running low.", risk:"green", symptoms:"Routine hypertension follow-up, no acute complaint", severity:"Low", age:52},
+  {label:"Snakebite emergency · Sudama Nagar", locality:"Sudama Nagar", transcript_en:"Farmer bitten on the foot by a snake while working in the field, swelling spreading fast, 20 minutes ago.", risk:"red", symptoms:"Snakebite, spreading swelling, envenomation risk", severity:"Critical", age:41},
+  {label:"Typhoid/viral fever · Palasia", locality:"Palasia", transcript_en:"Caller reports 4 days of continuous fever, weakness and loss of appetite — suspect typhoid or viral fever.", risk:"yellow", symptoms:"Continuous fever, weakness, low appetite — suspect typhoid/viral", severity:"Moderate", age:24}
+];
+
+let currentScenario = null;
+let phaseTimer = null;
+let leafletMap = null;
+
+/* ---------------- NAV ---------------- */
+function go(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(view==='mgmt'){ renderMgmt(); setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 200); }
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2600);
+}
+
+/* ---------------- HINDI VOICE AGENT ---------------- */
+function speakHindi(text){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'hi-IN'; u.rate = 0.92; u.pitch = 1.02;
+    const voices = speechSynthesis.getVoices();
+    const hiVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('hi'));
+    if(hiVoice) u.voice = hiVoice;
+    speechSynthesis.speak(u);
+  }catch(e){ toast("Speech playback not supported in this browser"); }
+}
+function playGreeting(){
+  speakHindi("नमस्ते, मैं वाणी हूँ, आपकी हिंदी स्वास्थ्य सहायक। कृपया अपनी या अपने परिवार की समस्या बताएं। मैं सुनूँगी और सही मदद तक पहुँचाऊँगी।");
+  toast(currentLang==='hi' ? "वाणी बोल रही है…" : "Vaani is speaking…");
+}
+
+/* Speech-to-text (Hindi) — Web Speech API, Chrome/Edge only */
+let recognition = null, isListening = false;
+function toggleMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast("Speech-to-text isn't supported in this browser — try Chrome, or type instead."); return; }
+  if(isListening){ recognition && recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = 'hi-IN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  const micBtn = document.getElementById('micBtn'), micStatus = document.getElementById('micStatus');
+  recognition.onstart = ()=>{ isListening=true; micBtn.classList.add('listening'); micStatus.textContent = currentLang==='hi'?'सुन रहे हैं…':'Listening…'; };
+  recognition.onend = ()=>{ isListening=false; micBtn.classList.remove('listening'); micStatus.textContent=''; };
+  recognition.onerror = (e)=>{ isListening=false; micBtn.classList.remove('listening'); micStatus.textContent = 'Mic error: '+e.error; };
+  recognition.onresult = (e)=>{
+    const text = e.results[0][0].transcript;
+    document.getElementById('liveText').value = text;
+    document.querySelectorAll('.scenario-btn').forEach(x=>x.classList.remove('active'));
+    currentScenario = null;
+  };
+  recognition.start();
+}
+
+/* ---------------- PATIENT: SCENARIO PICKER ---------------- */
+function renderScenarios(){
+  const row = document.getElementById('scenarioRow');
+  row.innerHTML = '';
+  scenarios.forEach((s)=>{
+    const b = document.createElement('button');
+    b.className = 'scenario-btn';
+    b.textContent = s.label;
+    b.onclick = ()=>{ currentScenario = {...s, isLive:false};
+      document.getElementById('localitySelect').value = s.locality;
+      document.querySelectorAll('.scenario-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById('liveText').value = '';
+    };
+    row.appendChild(b);
+  });
+}
+renderScenarios();
+
+function classifyText(text){
+  const t = text.toLowerCase();
+  const redWords = ["chest pain","breath","साँस","sans","snake","साँप","unconscious","bleeding","खून","seizure","stroke"];
+  const yellowWords = ["fever","bukhar","बुखार","cough","khansi","खांसी","vomit","उल्टी","pain","दर्द","typhoid","dengue","डेंगू"];
+  let risk = "green", severity="Low";
+  if(redWords.some(w=>t.includes(w))){ risk="red"; severity="Critical"; }
+  else if(yellowWords.some(w=>t.includes(w))){ risk="yellow"; severity="Moderate"; }
+  return {symptoms: text.slice(0,90)||"No symptom text provided", severity, risk, age:"—"};
+}
+
+/* ---------------- CALL DEMO PHASE MACHINE ---------------- */
+const phases = ["Pick","Calling","Extracting","Verdict","Sending"];
+function renderPhaseTrack(activeIdx){
+  const track = document.getElementById('phaseTrack');
+  track.innerHTML = '';
+  phases.forEach((p,i)=>{
+    const d = document.createElement('div');
+    d.className = 'phase-dot' + (i<=activeIdx ? ' done':'');
+    track.appendChild(d);
+  });
+}
+renderPhaseTrack(-1);
+
+function startCall(){
+  clearTimeout(phaseTimer);
+  const liveText = document.getElementById('liveText').value.trim();
+  const locality = document.getElementById('localitySelect').value;
+  let scenario;
+  if(liveText){
+    const c = classifyText(liveText);
+    scenario = {label:"Live report", locality, transcript_en:liveText, risk:c.risk, symptoms:c.symptoms, severity:c.severity, age:c.age, isLive:true};
+  } else if(currentScenario){
+    scenario = {...currentScenario, locality: currentScenario.locality};
+  } else {
+    toast(currentLang==='hi' ? "पहले एक परिदृश्य चुनें या रिपोर्ट लिखें/बोलें" : "Pick a scenario or type/speak a live report first");
+    return;
+  }
+  currentScenario = scenario;
+  document.getElementById('emergencySection').style.display='none';
+  document.getElementById('vaaniBox').style.display='none';
+  document.getElementById('riskPanel').innerHTML = `<p style="color:var(--ink-soft); font-size:0.88rem;">${currentLang==='hi'?'वर्गीकृत किया जा रहा है…':'Classifying…'}</p>`;
+
+  const stage = document.getElementById('callStage');
+  renderPhaseTrack(0);
+  stage.innerHTML = `<div class="big-icon">📞</div><p style="font-size:0.9rem;">Calling in from <b>${scenario.locality}</b>…</p>`;
+
+  phaseTimer = setTimeout(()=>{
+    renderPhaseTrack(1);
+    stage.innerHTML = `<div class="big-icon">🎙️</div><p style="font-size:0.9rem;">Recording: "${scenario.transcript_en}"</p>`;
+    phaseTimer = setTimeout(()=>{
+      renderPhaseTrack(2);
+      const json = `{
+  "locality": "${scenario.locality}",
+  "symptoms": "${scenario.symptoms}",
+  "severity": "${scenario.severity}",
+  "age": ${JSON.stringify(scenario.age)}
+}`;
+      stage.innerHTML = `<div style="width:100%;">
+        <p style="font-size:0.78rem; color:var(--ink-soft); margin-bottom:8px; font-family:var(--font-mono);">${scenario.isLive ? 'LOCAL RULE-BASED EXTRACTION (demo stand-in for a Gemini call)':'SCRIPTED EXTRACTION — replays a pre-written JSON reveal'}</p>
+        <div class="json-reveal">${json}</div>
+      </div>`;
+      phaseTimer = setTimeout(()=>{
+        renderPhaseTrack(3);
+        showVerdict(scenario);
+        phaseTimer = setTimeout(()=>{
+          renderPhaseTrack(4);
+          stage.innerHTML = `<div class="big-icon">✅</div><p style="font-size:0.9rem;">Report logged. Dashboard, alerts and (if red) emergency layer updated.</p>`;
+          if(scenario.risk === 'red'){ runEmergencyLayer(scenario); }
+        }, 1400);
+      }, 1600);
+    }, 1200);
+  }, 900);
+}
+
+function showVerdict(scenario){
+  const cls = scenario.risk==='red'?'risk-red':scenario.risk==='yellow'?'risk-yellow':'risk-green';
+  const label = scenario.risk==='red'?'RED — Emergency':scenario.risk==='yellow'?'YELLOW — Needs follow-up':'GREEN — Routine / Safe';
+  document.getElementById('riskPanel').innerHTML = `
+    <div class="risk-badge ${cls}">${label}</div>
+    <div style="margin-top:14px; font-size:0.86rem; line-height:1.8;">
+      <div><b>Locality:</b> ${scenario.locality}</div>
+      <div><b>Symptoms:</b> ${scenario.symptoms}</div>
+      <div><b>Severity:</b> ${scenario.severity}</div>
+      <div><b>Age:</b> ${scenario.age}</div>
+    </div>`;
+  const vaaniLines = {
+    green:"आपकी रिपोर्ट मिल गई है। कोई तुरंत ख़तरा नहीं है — कृपया PHC के कार्यालय समय में संपर्क करें।",
+    yellow:"आपकी रिपोर्ट मिल गई है। कृपया आराम करें और पानी ज़्यादा पिएं — एक स्वास्थ्य कार्यकर्ता 24 घंटे में आपसे मिलने आएगा।",
+    red:"यह एक आपातकालीन स्थिति है। हम तुरंत नज़दीकी अस्पताल और एम्बुलेंस को सूचित कर रहे हैं — मदद रास्ते में है।"
+  };
+  document.getElementById('vaaniBox').style.display='block';
+  document.getElementById('vaaniText').textContent = vaaniLines[scenario.risk];
+  speakHindi(vaaniLines[scenario.risk]);
+  logAlert(scenario);
+}
+
+/* ---------------- EMERGENCY ESCALATION LAYER ---------------- */
+function scoreHospital(h, distanceKm, needCardiac){
+  let capScore = 0;
+  if(h.icu) capScore += 2;
+  if(h.trauma) capScore += 1.5;
+  if(needCardiac && h.cardiac) capScore += 2;
+  capScore += h.beds*0.2;
+  const distPenalty = distanceKm*0.3;
+  return capScore - distPenalty;
+}
+function runEmergencyLayer(scenario){
+  document.getElementById('emergencySection').style.display='block';
+  const needCardiac = /chest|cardiac/i.test(scenario.symptoms);
+  const patientPos = localityCoords[scenario.locality] || INDORE_CENTER;
+  const ranked = hospitals.map(h=>{
+    const dist = haversineKm(patientPos, [h.lat,h.lng]);
+    return {...h, distanceKm: Math.round(dist*10)/10, score: scoreHospital(h, dist, needCardiac)};
+  }).sort((a,b)=>b.score-a.score);
+  const best = ranked[0], runnerUp = ranked[1];
+  const eta = Math.max(6, Math.round(best.distanceKm*2.6));
+
+  document.getElementById('hospMatchBox').innerHTML = `
+    <h4 style="font-size:0.95rem; margin-bottom:12px;">Best match — not just nearest</h4>
+    <div class="hosp-pick">
+      <b>${best.name}</b> · ${best.distanceKm} km · ETA ~${eta} min<br>
+      <span style="font-size:0.82rem; color:var(--ink-soft);">${best.specialties.join(", ")} · ${best.beds} beds free ${best.icu?'· ICU':''}</span>
+    </div>
+    <p style="font-size:0.75rem; color:var(--ink-soft); margin:8px 0 4px;">Passed over (closer or equal distance, weaker capability fit):</p>
+    <div class="hosp-alt"><b>${runnerUp.name}</b> · ${runnerUp.distanceKm} km — ${runnerUp.specialties.join(", ")}</div>
+    <p style="font-size:0.72rem; color:var(--ink-soft); margin-top:8px;">📞 Ambulance dispatch line: <a href="tel:108"><b>108</b></a></p>
+  `;
+  document.getElementById('notifBox').innerHTML = `
+    <div class="notif-card"><div class="tag">Family</div>Location: ${scenario.locality} · Hospital: ${best.name} · ETA: ${eta} min</div>
+    <div class="notif-card"><div class="tag">Doctor on duty</div>Age ${scenario.age} · Symptoms: ${scenario.symptoms} · Risk: RED — prepare for arrival</div>
+    <div class="notif-card"><div class="tag">Hospital (${best.name})</div>Incoming red-risk case, ETA ${eta} min. Resources needed: ${best.icu?'ICU bed, ':''}${best.trauma?'trauma team':'general ward'}.</div>
+    <div class="notif-card"><div class="tag">Ambulance (108)</div>Dispatched — estimated arrival at patient location in ${Math.round(eta/2)} min.</div>
+  `;
+}
+
+/* ---------------- ALERT LOG (feeds Management view) ---------------- */
+let alertLog = [
+  {locality:"Banganga", rule:"Cluster rule: 5 reports in 3 days", detail:"5th dengue-suspect fever report in Banganga this week — threshold crossed at report #5.", transcript:"ASHA report: fever, body ache, rash — 3rd day, child patient.", field:"symptoms: fever, rash · severity: moderate", risk:"yellow", time:"2 days ago"},
+  {locality:"Rau", rule:"Stockout formula: days left = stock ÷ burn", detail:"Insulin at PHC Rau: 18 vials ÷ 6/day burn = 3 days left.", transcript:"Auto-generated from daily stock log, not a phone report.", field:"stock: 18 vials · burn: 6/day", risk:"orange", time:"6 hours ago"}
+];
+function logAlert(scenario){
+  if(scenario.risk === 'green') return;
+  alertLog.unshift({
+    locality: scenario.locality,
+    rule: scenario.isLive ? "Local rule-based keyword match" : "Scripted scenario risk label",
+    detail: `Call classified ${scenario.risk.toUpperCase()} — ${scenario.symptoms}.`,
+    transcript: scenario.transcript_en,
+    field: `symptoms: ${scenario.symptoms} · severity: ${scenario.severity}`,
+    risk: scenario.risk,
+    time: "just now"
+  });
+  if(document.getElementById('view-mgmt').classList.contains('active')) renderAlerts();
+}
+
+/* ---------------- MANAGEMENT DASHBOARD ---------------- */
+function renderMgmt(){
+  renderStats();
+  initOrUpdateMap();
+  renderFootfall();
+  renderAlerts();
+  renderHospitals();
+}
+
+function renderStats(){
+  const criticalMed = medicines.filter(m=> (m.stock/m.burn) <= 3);
+  const totalDoctorsPresent = doctorAttendance.reduce((a,d)=>a+d.present,0);
+  const totalDoctors = doctorAttendance.reduce((a,d)=>a+d.total,0);
+  const stats = [
+    {num: criticalMed.length, lbl:"Medicines under 3 days stock", delta: criticalMed.map(m=>m.name).join(", ")||"None", color:"var(--red)"},
+    {num: hospitals.reduce((a,h)=>a+h.beds,0), lbl:"Beds free across partner hospitals", delta:"Live seeded count", color:"var(--green)"},
+    {num: `${totalDoctorsPresent}/${totalDoctors}`, lbl:"Doctors present today (all PHCs)", delta: totalDoctorsPresent/totalDoctors < 0.7 ? "Below 70% — flagged":"Healthy", color: totalDoctorsPresent/totalDoctors<0.7?"var(--amber)":"var(--green)"},
+    {num: footfall[footfall.length-1], lbl:"Patient footfall today", delta:`vs ${footfall[footfall.length-2]} yesterday`, color:"var(--navy)"}
+  ];
+  document.getElementById('statGrid').innerHTML = stats.map(s=>`
+    <div class="stat-card">
+      <div class="num" style="color:${s.color}">${s.num}</div>
+      <div class="lbl">${s.lbl}</div>
+      <div class="delta" style="color:var(--ink-soft)">${s.delta}</div>
+    </div>`).join('');
+}
+
+function initOrUpdateMap(){
+  const el = document.getElementById('realMap');
+  if(!el || typeof L === 'undefined') return;
+  if(!leafletMap){
+    leafletMap = L.map('realMap').setView(INDORE_CENTER, 11.3);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+    }).addTo(leafletMap);
+  } else {
+    leafletMap.eachLayer(layer=>{ if(layer instanceof L.CircleMarker || layer instanceof L.Marker) leafletMap.removeLayer(layer); });
+  }
+  const riskColor = {red:'#B23A2E', orange:'#C77B18', blue:'#3E7CB1'};
+  localities.forEach(loc=>{
+    const coords = localityCoords[loc];
+    const risk = zoneRisk[loc];
+    L.circleMarker(coords, {radius:12, color:'#fff', weight:2, fillColor:riskColor[risk], fillOpacity:0.9})
+      .addTo(leafletMap)
+      .bindPopup(`<b>${loc}</b><br>Risk zone: ${risk.toUpperCase()}`);
+  });
+  const hospIcon = L.divIcon({className:'', html:'<div style="background:#1F3A3D;width:14px;height:14px;border-radius:3px;border:2px solid #fff;box-shadow:0 0 0 1px #1F3A3D;"></div>', iconSize:[14,14]});
+  hospitals.forEach(h=>{
+    L.marker([h.lat,h.lng], {icon:hospIcon}).addTo(leafletMap)
+      .bindPopup(`<b>${h.name}</b><br>${h.specialties.join(", ")}<br>Rating: ${h.reviews}/5 · ${h.beds} beds free`);
+  });
+}
+
+function renderFootfall(){
+  const max = Math.max(...footfall);
+  const bars = footfall.map((v,i)=>{
+    const h = Math.round((v/max)*100);
+    const day = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][i];
+    return `<div style="display:flex; flex-direction:column; align-items:center; gap:6px; flex:1;">
+      <div style="font-size:0.68rem; color:var(--ink-soft); font-family:var(--font-mono);">${v}</div>
+      <div style="width:70%; height:${h}px; background:var(--accent); border-radius:5px 5px 0 0;"></div>
+      <div style="font-size:0.68rem; color:var(--ink-soft);">${day}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('footfallChart').innerHTML = `<div style="display:flex; align-items:flex-end; gap:6px; height:140px;">${bars}</div>`;
+}
+
+function renderAlerts(){
+  document.getElementById('alertFeed').innerHTML = alertLog.map((a,i)=>{
+    const badgeCls = a.risk==='red'?'risk-red':'risk-yellow';
+    return `<div class="alert-item" id="alert-${i}">
+      <div class="top-row" onclick="toggleAlert(${i})">
+        <div><b>${a.locality}</b> · <span class="risk-badge ${badgeCls}" style="padding:3px 10px; font-size:0.7rem;">${a.risk.toUpperCase()}</span></div>
+        <div style="font-size:0.75rem; color:var(--ink-soft);">${a.time} ▾</div>
+      </div>
+      <div class="evidence">
+        <div class="evidence-step"><b>1. Transcript / source:</b> ${a.transcript}</div>
+        <div class="evidence-step"><b>2. Extracted fields:</b> ${a.field}</div>
+        <div class="evidence-step"><b>3. Rule fired:</b> ${a.rule}</div>
+        <div class="evidence-step"><b>4. Alert generated:</b> ${a.detail}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleAlert(i){
+  document.getElementById('alert-'+i).classList.toggle('open');
+}
+
+function renderHospitals(){
+  const locality = (currentScenario && currentScenario.locality) || "Vijay Nagar";
+  const patientPos = localityCoords[locality] || INDORE_CENTER;
+  const withDist = hospitals.map(h=>({...h, distanceKm: Math.round(haversineKm(patientPos,[h.lat,h.lng])*10)/10}))
+    .sort((a,b)=>a.distanceKm-b.distanceKm);
+  document.getElementById('hospList').innerHTML = withDist.map(h=>{
+    const stars = "★".repeat(Math.round(h.reviews)) + "☆".repeat(5-Math.round(h.reviews));
+    return `<div class="hosp-row">
+      <div>
+        <b>${h.name}</b><br>
+        <span style="font-size:0.78rem; color:var(--ink-soft);">${h.specialties.join(", ")} · ${h.beds} beds free · ${h.distanceKm} km from ${locality}</span>
+      </div>
+      <div style="text-align:right;">
+        <div class="stars">${stars} ${h.reviews}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.tabpane').forEach(p=>p.style.display='none');
+  document.getElementById('tab-'+name).style.display='block';
+  if(name==='overview') setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 50);
+}
+
+function generateBrief(){
+  const criticalMed = medicines.filter(m=> (m.stock/m.burn) <= 3);
+  const worstPHC = doctorAttendance.reduce((worst,d)=> (d.present/d.total) < (worst.present/worst.total) ? d : worst);
+  const topAlert = alertLog[0];
+  const brief = document.getElementById('mpBrief');
+  brief.classList.add('show');
+  brief.innerHTML = `
+    <h4>Weekly Pulse Brief — Indore Constituency</h4>
+    <p><b>1. Top open alert:</b> ${topAlert.locality} is flagged ${topAlert.risk.toUpperCase()} — ${topAlert.detail}</p><br>
+    <p><b>2. Stock watch:</b> ${criticalMed.length ? criticalMed.map(m=>`${m.name} has ${(m.stock/m.burn).toFixed(1)} days of stock left`).join('; ') : 'No medicine at critical stockout risk this week.'}</p><br>
+    <p><b>3. Staffing:</b> ${worstPHC.phc} had the lowest doctor attendance this week (${worstPHC.present}/${worstPHC.total} days) — recommend a staffing review.</p><br>
+    <p style="color:var(--ink-soft); font-size:0.8rem; margin-top:10px;">Generated from live seeded dashboard data · Downloadable / shareable one-pager in production build.</p>
+  `;
+}
+
+/* ================= AUTH GATE ================= */
+let accounts = []; // {name, phone, pass, role}  — in-memory demo store
+let currentUser = null;
+
+function switchAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('authFormLogin').style.display = tab==='login' ? 'block':'none';
+  document.getElementById('authFormRegister').style.display = tab==='register' ? 'block':'none';
+  hideAuthError();
+}
+function openAuth(tab){
+  document.getElementById('authOverlay').classList.remove('hidden');
+  switchAuthTab(tab||'login');
+}
+function hideAuthError(){ const e=document.getElementById('authError'); e.classList.remove('show'); e.textContent=''; }
+function showAuthError(msg){ const e=document.getElementById('authError'); e.textContent=msg; e.classList.add('show'); }
+
+function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const role = document.getElementById('regRole').value;
+  if(!name || phone.length<10 || !pass){ showAuthError('Please fill name, a 10-digit mobile number, and a password.'); return; }
+  if(accounts.find(a=>a.phone===phone)){ showAuthError('An account with this number already exists — try Login instead.'); return; }
+  accounts.push({name, phone, pass, role});
+  loginAs({name, phone, role});
+  toast(`Welcome, ${name}! Account created (demo — stored only for this session).`);
+}
+function doLogin(){
+  const phone = document.getElementById('loginPhone').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if(!phone || !pass){ showAuthError('Enter your mobile number and password.'); return; }
+  let acc = accounts.find(a=>a.phone===phone && a.pass===pass);
+  if(!acc){
+    // demo-friendly: if number isn't registered yet, auto-create a lightweight session so judges/testers can proceed
+    acc = {name:'Guest User', phone, role:'patient'};
+  }
+  loginAs(acc);
+  toast(`Logged in as ${acc.name}`);
+}
+function enterGuest(){
+  loginAs({name:'Guest', phone:'—', role:'guest'});
+}
+function loginAs(acc){
+  currentUser = acc;
+  document.getElementById('authOverlay').classList.add('hidden');
+  document.getElementById('navGuestBtns').style.display = 'none';
+  document.getElementById('navUserBtns').style.display = 'inline-flex';
+  document.getElementById('navUserName').textContent = `👤 ${acc.name}`;
+  if(acc.role === 'mgmt') go('mgmt'); else go('home');
+}
+function doLogout(){
+  currentUser = null;
+  document.getElementById('navGuestBtns').style.display = 'inline-flex';
+  document.getElementById('navUserBtns').style.display = 'none';
+  openAuth('login');
+  go('home');
+}
+// gate the app on load
+openAuth('login');
+
+/* ================= SOS BUTTON ================= */
+function triggerSOS(){
+  toggleChat(true);
+  chatPush('user', '🆘 SOS — this is an emergency');
+  chatPush('bot', 'This looks urgent. If you can, call an ambulance right now — tap the number below. I\'m also finding the nearest capable hospital for you.');
+  chatQuick([]);
+  const locality = document.getElementById('localitySelect') ? document.getElementById('localitySelect').value : 'Vijay Nagar';
+  const patientPos = localityCoords[locality] || INDORE_CENTER;
+  const ranked = hospitals.map(h=>({...h, distanceKm: Math.round(haversineKm(patientPos,[h.lat,h.lng])*10)/10}))
+    .sort((a,b)=>a.distanceKm-b.distanceKm);
+  const best = ranked[0];
+  chatPush('bot', `Nearest match: <b>${best.name}</b> · ${best.distanceKm} km · ${best.beds} beds free ${best.icu?'· ICU available':''}.<br>📞 <a href="tel:108">Call 108 — Ambulance</a> · <a href="tel:112">Call 112 — Emergency</a>`);
+  speakHindi('यह एक आपातकालीन स्थिति है। कृपया तुरंत 108 पर एम्बुलेंस को कॉल करें। हम नज़दीकी अस्पताल खोज रहे हैं।');
+}
+
+/* ================= CHATBOT WIDGET ================= */
+let chatState = { stage:'idle', answers:[] };
+function toggleChat(forceOpen){
+  const w = document.getElementById('chatWindow');
+  const willOpen = forceOpen===true ? true : !w.classList.contains('open');
+  w.classList.toggle('open', willOpen);
+  if(willOpen && document.getElementById('chatBody').children.length===0){
+    chatPush('bot', 'नमस्ते 🙏 I\'m Vaani, your AI health assistant. I can help you use this site, or ask me about a health problem and I\'ll help you decide what to do next.');
+    chatQuick(['Site helps me choose a hospital?','I have a health problem','Find nearest hospital beds','Talk to Vaani in Hindi']);
+  }
+}
+function chatPush(who, html){
+  const body = document.getElementById('chatBody');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + who;
+  div.innerHTML = html;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+function chatQuick(options){
+  if(!options.length) return;
+  const body = document.getElementById('chatBody');
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-quick';
+  options.forEach(o=>{
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = ()=> handleChatInput(o);
+    wrap.appendChild(b);
+  });
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+}
+function sendChat(){
+  const input = document.getElementById('chatInput');
+  const val = input.value.trim();
+  if(!val) return;
+  input.value = '';
+  handleChatInput(val);
+}
+function handleChatInput(text){
+  chatPush('user', text);
+  const low = text.toLowerCase();
+
+  // site-help intents
+  if(/hospital.*bed|find nearest hospital/i.test(text)){
+    chatPush('bot', 'Sure — open the <b>Hospitals & Doctors</b> page from the top nav for live bed counts, or tell me your locality and symptom and I\'ll match you directly.');
+    return;
+  }
+  if(/hindi|वाणी/i.test(text)){
+    speakHindi('नमस्ते, मैं वाणी हूँ। आप मुझसे हिंदी में भी बात कर सकते हैं। कृपया अपनी समस्या बताएं।');
+    chatPush('bot', 'नमस्ते! You can type or speak in Hindi using the 🎤 button below.');
+    return;
+  }
+  if(/site helps|use this site|how.*website|navigate/i.test(text)){
+    chatPush('bot', 'This site has 4 main areas: <b>Patient Portal</b> (report a symptom, get an AI risk read), <b>Management Console</b> (district staff dashboard), <b>Patient Blog</b> (health tips), and <b>Hospitals & Doctors</b> (live directory). Tap any nav link, or just tell me what you\'re trying to do.');
+    chatQuick(['I have a health problem']);
+    return;
+  }
+
+  // symptom triage — a short back-and-forth before deciding
+  if(chatState.stage === 'idle' || /health problem|symptom|pain|fever|sick|बीमार|दर्द/i.test(low)){
+    chatState = {stage:'q1', answers:[text]};
+    chatPush('bot', 'I\'m sorry to hear that. A couple of quick questions first — how long has this been going on? (e.g. today, 2 days, a week)');
+    return;
+  }
+  if(chatState.stage === 'q1'){
+    chatState.answers.push(text);
+    chatState.stage = 'q2';
+    chatPush('bot', 'Understood. One more — on a scale of mild / moderate / severe, how bad does it feel right now, and is there any chest pain, breathing trouble, heavy bleeding, or loss of consciousness?');
+    return;
+  }
+  if(chatState.stage === 'q2'){
+    chatState.answers.push(text);
+    const combined = chatState.answers.join(' . ');
+    const c = classifyText(combined);
+    chatState.stage = 'idle';
+    const verdictMsg = {
+      red:'🔴 This could be serious. Please don\'t wait — go to the nearest hospital or call an ambulance now.',
+      yellow:'🟡 This needs follow-up soon. Rest, stay hydrated, and see a doctor within 24 hours if it doesn\'t improve.',
+      green:'🟢 This sounds low-risk for now. Rest, fluids, and monitor — see a PHC doctor if it continues beyond 2-3 days.'
+    }[c.risk];
+    chatPush('bot', verdictMsg);
+    speakHindi(c.risk==='red' ? 'यह गंभीर हो सकता है, कृपया तुरंत नज़दीकी अस्पताल जाएं।' : c.risk==='yellow' ? 'कृपया आराम करें और 24 घंटे में डॉक्टर से मिलें।' : 'आराम करें और पानी पिएं, ज़रूरत पड़ने पर डॉक्टर से मिलें।');
+    if(c.risk === 'red'){
+      const locality = document.getElementById('localitySelect') ? document.getElementById('localitySelect').value : 'Vijay Nagar';
+      const patientPos = localityCoords[locality] || INDORE_CENTER;
+      const needCardiac = /chest|cardiac/i.test(combined);
+      const ranked = hospitals.map(h=>{
+        const dist = haversineKm(patientPos,[h.lat,h.lng]);
+        return {...h, distanceKm: Math.round(dist*10)/10, score: scoreHospital(h, dist, needCardiac)};
+      }).sort((a,b)=>b.score-a.score);
+      const best = ranked[0];
+      chatPush('bot', `Suggested hospital: <b>${best.name}</b> · ${best.distanceKm} km from ${locality} · ${best.beds} beds free ${best.icu?'· ICU':''}.<br>📞 <a href="tel:108">Call 108 now</a>`);
+    } else {
+      chatQuick(['Find nearest hospital beds','I have another question']);
+    }
+    return;
+  }
+  chatPush('bot', 'Got it — tell me more, or ask me anything about using ArogyaAI.');
+}
+
+/* Chat mic (Hindi speech-to-text reusing same Web Speech API) */
+let chatRecognition = null, chatListening = false;
+function toggleChatMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast("Speech-to-text isn't supported in this browser — try Chrome, or type instead."); return; }
+  const micBtn = document.getElementById('chatMicBtn');
+  if(chatListening){ chatRecognition && chatRecognition.stop(); return; }
+  chatRecognition = new SR();
+  chatRecognition.lang = 'hi-IN';
+  chatRecognition.interimResults = false;
+  chatRecognition.maxAlternatives = 1;
+  chatRecognition.onstart = ()=>{ chatListening=true; micBtn.classList.add('listening'); };
+  chatRecognition.onend = ()=>{ chatListening=false; micBtn.classList.remove('listening'); };
+  chatRecognition.onerror = ()=>{ chatListening=false; micBtn.classList.remove('listening'); };
+  chatRecognition.onresult = (e)=>{ handleChatInput(e.results[0][0].transcript); };
+  chatRecognition.start();
+}
+
+/* ================= PATIENT BLOG ================= */
+const patientBlogPosts = [
+  {tag:'Fever', risk:'orange', title:'Fever for 2–3 days? Here\'s what to check first', body:'Track the temperature twice a day, keep fluids up, and watch for rash, breathing trouble, or fever above 103°F. If it crosses 3 days, or a child is affected, get a PHC check rather than waiting it out.'},
+  {tag:'Dengue season', risk:'red', title:'Dengue in Indore: what a household should do this monsoon', body:'Clear standing water weekly (coolers, pots, tyres), use nets/repellent at dawn and dusk, and seek testing quickly for fever with body ache or rash — early fluids matter more than any medicine.'},
+  {tag:'Heart health', risk:'red', title:'Chest pain — when it is not "just gas"', body:'Sudden chest pain with sweating, breathlessness, or pain spreading to the arm/jaw is never something to wait out. Call 108 and get to the nearest ICU-capable hospital immediately.'},
+  {tag:'Chronic care', risk:'orange', title:'Living with hypertension or diabetes in a PHC catchment', body:'Keep a simple paper log of BP/sugar readings, don\'t skip refill visits even when you feel fine, and ask your PHC about the nearest stock of your regular medicine before it runs out.'},
+  {tag:'Child health', risk:'green', title:'ORS at home — the first response to a child\'s diarrhoea', body:'Start ORS at the first loose motion, small sips often rather than large amounts at once, and go to a PHC if there is blood, high fever, or the child stops passing urine.'},
+  {tag:'Snakebite', risk:'red', title:'Snakebite in the field: the only three things that matter', body:'Keep the person still, keep the bitten limb below heart level, and get to a hospital with anti-venom immediately — do not cut, suck, or apply ice to the wound.'}
+];
+function renderPatientBlog(){
+  document.getElementById('patientBlogGrid').innerHTML = patientBlogPosts.map(p=>`
+    <div class="blog-card risk-tag-${p.risk}">
+      <span class="tag2">${p.tag}</span>
+      <h4>${p.title}</h4>
+      <p>${p.body}</p>
+    </div>`).join('');
+}
+
+/* ================= HOSPITAL / DOCTOR PUBLIC DIRECTORY ================= */
+const publicDoctors = [
+  {name:'Dr. Anjali Verma', spec:'General Medicine · PHC Banganga', present:true},
+  {name:'Dr. Rakesh Solanki', spec:'Pediatrics · PHC Rau', present:true},
+  {name:'Dr. Meera Joshi', spec:'Gynecology · PHC Sudama Nagar', present:false},
+  {name:'Dr. Sanjay Patidar', spec:'General Medicine · PHC Palasia', present:true},
+  {name:'Dr. Kavita Rathore', spec:'Cardiology (visiting) · Apollo Indore', present:true}
+];
+function renderDoctorDirectory(){
+  document.getElementById('doctorDirectory').innerHTML = publicDoctors.map(d=>`
+    <div class="doctor-card">
+      <div class="dav">${d.present ? '🩺':'🚪'}</div>
+      <div>
+        <div class="name">${d.name}</div>
+        <div class="spec">${d.spec}</div>
+        <div class="avail-dot"><span class="d" style="background:${d.present?'var(--green)':'var(--red)'}"></span>${d.present?'On duty today':'Off duty today'}</div>
+      </div>
+    </div>`).join('');
+}
+function renderMedStockPublic(){
+  document.getElementById('medStockPublic').innerHTML = medicines.map(m=>{
+    const days = m.stock/m.burn;
+    const status = days<=3 ? {c:'var(--red)', l:'Low stock'} : days<=7 ? {c:'var(--amber)', l:'Watch'} : {c:'var(--green)', l:'Well stocked'};
+    return `<div class="chs-card"><div><b style="font-size:0.86rem;">${m.name}</b><div style="font-size:0.72rem; color:var(--ink-soft);">${Math.round(days)} days of stock left</div></div><div style="color:${status.c}; font-weight:700; font-size:0.78rem;">${status.l}</div></div>`;
+  }).join('');
+}
+function renderCHSPublic(){
+  document.getElementById('chsPublic').innerHTML = localities.map(loc=>{
+    const risk = zoneRisk[loc];
+    const score = risk==='red'?42:risk==='orange'?68:88;
+    const color = risk==='red'?'var(--red)':risk==='orange'?'var(--amber)':'var(--green)';
+    return `<div class="chs-card"><b style="font-size:0.86rem;">${loc}</b><div class="chs-score" style="color:${color};">${score}</div></div>`;
+  }).join('');
+}
+function renderHospListPublic(){
+  document.getElementById('hospListPublic').innerHTML = hospitals.map(h=>{
+    const stars = "★".repeat(Math.round(h.reviews)) + "☆".repeat(5-Math.round(h.reviews));
+    return `<div class="hosp-row">
+      <div><b>${h.name}</b><br><span style="font-size:0.78rem; color:var(--ink-soft);">${h.specialties.join(", ")} · ${h.beds} beds free ${h.icu?'· ICU':''}</span></div>
+      <div style="text-align:right;"><div class="stars">${stars} ${h.reviews}</div></div>
+    </div>`;
+  }).join('');
+}
+renderPatientBlog();
+renderDoctorDirectory();
+renderMedStockPublic();
+renderCHSPublic();
+renderHospListPublic();
+
+/* init */
+switchTab('overview');
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = ()=>{}; }
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "ArogyaAI — Smart Health"
+version = "1.0.0"
+id = "artifacts/arogya-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22649
+
+[services.development]
+run = "pnpm --filter @workspace/arogya-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/arogya-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/arogya-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22649"
+BASE_PATH = "/"
