@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://arogyaai-d93z.onrender.com/api/:path*"
+    }
+  ]
+}
