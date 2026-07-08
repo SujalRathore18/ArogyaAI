@@ -9,7 +9,7 @@ export const Nav: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
-    <div className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+    <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border shadow-md">
       {/* Emergency Bar */}
       <div className="bg-secondary text-secondary-foreground text-xs font-mono py-1.5 px-4 flex justify-between items-center">
         <span>🚨 Rural / low-connectivity? Call direct:</span>
@@ -20,7 +20,7 @@ export const Nav: React.FC = () => {
       </div>
 
       {/* Main Nav */}
-      <div className="px-4 py-3 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
             <svg viewBox="0 0 24 24" fill="none" stroke="hsl(35, 75%, 52%)" strokeWidth="2" className="w-6 h-6">
@@ -28,13 +28,13 @@ export const Nav: React.FC = () => {
             </svg>
           </div>
           <div>
-            <div className="font-serif text-xl font-bold text-foreground">ArogyaAI</div>
+            <div className="font-serif text-2xl font-bold text-foreground">ArogyaAI</div>
             <div className="text-[10px] font-mono text-muted-foreground hidden sm:block">{t('nav.tagline')}</div>
           </div>
         </Link>
 
         <div className="flex items-center gap-6">
-          <div className="hidden md:flex gap-6 text-sm font-medium">
+          <div className="hidden md:flex gap-8 text-sm font-semibold">ArogyaAI</div>
             <Link href="/blog" className="text-foreground hover:text-primary transition-colors">{t('nav.blog')}</Link>
             <Link href="/hospitals" className="text-foreground hover:text-primary transition-colors">{t('nav.hospitals')}</Link>
           </div>
