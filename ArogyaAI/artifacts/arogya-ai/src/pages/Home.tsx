@@ -20,10 +20,10 @@ export default function Home() {
           </div>
           
           <div className="text-primary font-mono text-sm tracking-wide mb-4 uppercase">{t('home.eyebrow')}</div>
-          <h1 className="font-serif text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="font-serif text-6xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
             {t('home.h1')}
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-medium">
+          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto font-medium">
             {t('home.sub')}
           </p>
         </div>
@@ -32,7 +32,7 @@ export default function Home() {
           <Link href="/patient">
             <motion.div 
               className="group cursor-pointer bg-card border-2 border-transparent hover:border-[#3B8C5A] rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all h-full"
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               data-testid="card-patient-portal"
             >
               <div className="w-16 h-16 bg-[#E4F1E7] rounded-full flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
@@ -49,7 +49,7 @@ export default function Home() {
           <Link href="/mgmt">
             <motion.div 
               className="group cursor-pointer bg-card border-2 border-transparent hover:border-secondary rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all h-full"
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               data-testid="card-mgmt-portal"
             >
               <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
