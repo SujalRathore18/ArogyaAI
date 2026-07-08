@@ -44,8 +44,8 @@ function AppShell() {
       {/* Voice Agent trigger — bottom-left */}
       <button
         onClick={() => setVoiceOpen(true)}
-        className="fixed bottom-6 left-6 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl z-50 hover:scale-105 transition-transform"
-        style={{ background: '#1F3A3D', border: '2px solid #3B8C5A44' }}
+        className="fixed bottom-6 left-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-3xl z-50 hover:scale-15 transition-transform"
+        style={{
         title="Talk to Vaani voice agent"
         aria-label="Open voice agent"
       >
