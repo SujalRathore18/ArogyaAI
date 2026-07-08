@@ -112,7 +112,7 @@ export const ChatWidget: React.FC<{ isOpen: boolean; onClose: () => void; onTogg
     if (!Ctor) return;
     const rec = new Ctor();
     rec.lang = 'hi-IN';
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = false;
     setMicListening(true);
     rec.onresult = e => { setInput(e.results[0][0].transcript); setMicListening(false); };
